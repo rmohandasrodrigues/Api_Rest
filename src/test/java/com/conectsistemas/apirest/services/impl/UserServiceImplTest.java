@@ -12,6 +12,7 @@ import org.mockito.MockitoAnnotations;
 import org.modelmapper.ModelMapper;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -25,6 +26,7 @@ class UserServiceImplTest {
     public static final String NOME = "Valdir";
     public static final String EMAIL = "valdir@gmail.com";
     public static final String PASSWORD = "1234";
+    public static final String OBJETO_NAO_ENCONTRADO = "Objeto não encontrado!";
     @InjectMocks // Cria uma instancia real da classe UserServiceImplTest
     private UserServiceImpl userService;
     @Mock
@@ -62,18 +64,34 @@ class UserServiceImplTest {
 
     @Test
     void whenFindByIdThenReturnAnObjectNotFoundException() {
-        when(userRepository.findById(anyInt())).thenThrow(new ObjectNotFoundException("Objeto não encontrado!"));
+        when(userRepository.findById(anyInt())).thenThrow(new ObjectNotFoundException(OBJETO_NAO_ENCONTRADO));
 
         try{
             userService.findById(ID);
         } catch (Exception ex) {
             assertEquals(ObjectNotFoundException.class, ex.getClass());
-            assertEquals("Objeto não encontrado!", ex.getMessage());
+            assertEquals(OBJETO_NAO_ENCONTRADO, ex.getMessage());
         }
     }
 
     @Test
-    void findAll() {
+    void whenfindAllThenReturnAnListOfUsers() {
+        when(userRepository.findAll()).thenReturn(List.of(user));
+
+        List<User> response = userService.findAll();
+
+        //Assegura que o resultado da pesquinsa não seja nula.
+        assertNotNull(response);
+        //Verifica na resposta da lista se esta retornando somente um usuario.
+        assertEquals(1, response.size());
+        //Assegura que o objeto do index 0 e o mesmo que a classe User
+        assertEquals(User.class, response.get(0).getClass());
+
+        //Verifica se o que foi passado e igual o da resposta de retorno;
+        assertEquals(ID, response.get(0).getId());
+        assertEquals(NOME, response.get(0).getNome());
+        assertEquals(EMAIL, response.get(0).getEmail());
+        assertEquals(PASSWORD, response.get(0).getPassword());
     }
 
     @Test
