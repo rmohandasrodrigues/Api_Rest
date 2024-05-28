@@ -3,6 +3,7 @@ package com.conectsistemas.apirest.services.impl;
 import com.conectsistemas.apirest.Repository.UserRepository;
 import com.conectsistemas.apirest.domain.User;
 import com.conectsistemas.apirest.domain.dto.UserDTO;
+import com.conectsistemas.apirest.services.exceptions.ObjectNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -55,6 +56,20 @@ class UserServiceImplTest {
         assertEquals(User.class, response.getClass());
         // Assegura que sempre o id seja igual o da resposta.
         assertEquals(ID, response.getId());
+        assertEquals(NOME, response.getNome());
+        assertEquals(EMAIL, response.getEmail());
+    }
+
+    @Test
+    void whenFindByIdThenReturnAnObjectNotFoundException() {
+        when(userRepository.findById(anyInt())).thenThrow(new ObjectNotFoundException("Objeto não encontrado!"));
+
+        try{
+            userService.findById(ID);
+        } catch (Exception ex) {
+            assertEquals(ObjectNotFoundException.class, ex.getClass());
+            assertEquals("Objeto não encontrado!", ex.getMessage());
+        }
     }
 
     @Test
